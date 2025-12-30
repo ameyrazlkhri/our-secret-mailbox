@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Zaid & Amira's Secret 💌</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&family=Cedarville+Cursive&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #ff758f;
+      --glass: rgba(255, 255, 255, 0.9);
+      --border: rgba(255, 255, 255, 0.3);
+      --soft-pink: #fde2e4; 
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #5d4a4a;
+      background-color: var(--soft-pink);
+      background-attachment: fixed;
+    }
+
+    h1, h2, h3, #welcomeHeader { 
+      font-family: 'Cedarville Cursive', cursive; 
+      color: #ff4d6d; 
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px 0 rgba(255, 117, 143, 0.1);
+      margin: 40px auto;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    #lockScreen { margin-top: 100px; }
+    #finalInbox { display: none; width: 100%; }
+
+    input[type="password"], select { 
+        width: 100%; 
+        height: 52px; 
+        padding: 0 15px; 
+        margin: 12px 0; 
+        border: 1px solid #ddd; 
+        border-radius: 12px; 
+        font-family: 'Poppins', sans-serif; 
+        outline: none;
+        box-sizing: border-box; 
+        font-size: 14px;
+        background: white;
+    }
+
+    #mailbox { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+    .envelope { 
+        width: 80px; height: 55px; background: #ffc1cc; border-radius: 6px; 
+        display: flex; align-items: center; justify-content: center; font-size: 26px; 
+        cursor: pointer; transition: 0.3s;
+        background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 50%, transparent 50%);
+    }
+    .envelope:hover { transform: translateY(-5px); background: #ffb3c1; }
+
+    #letterDisplay {
+      display: none; 
+      background: white; 
+      padding: 50px 40px 40px 65px;
+      margin-top: 30px;
+      font-family: 'Cedarville Cursive', cursive; 
+      font-size: 24px; 
+      text-align: left;
+      border-radius: 8px;
+      position: relative;
+      white-space: pre-wrap;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+      line-height: 1.6em;
+      background-image: linear-gradient(rgba(173, 216, 230, 0.6) 1px, transparent 1px);
+      background-size: 100% 1.6em;
+      transition: background-color 0.4s ease;
+    }
+
+    #letterDisplay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50px;
+      height: 100%;
+      width: 2px;
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+
+    button { 
+        padding: 14px 28px; background: var(--primary); color: white; border: none; 
+        border-radius: 50px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif;
+        letter-spacing: 1px; transition: 0.3s;
+    }
+    button:hover { background: #ff4d6d; }
+  </style>
+</head>
+<body>
+
+<div id="lockScreen" class="glass-card">
+  <h1>Welcome Home</h1>
+  <p style="font-size: 13px; color: #ff758f; margin-bottom: 5px;">An important date (no dashes)</p>
+  <select id="userSelect"><option value="zaid">Zaid :D</option><option value="amira">Amira :)</option></select>
+  <input type="password" id="secretCode" placeholder="Secret Code">
+  <button id="unlockBtn" style="width: 100%; margin-top: 10px;">Enter Private Space</button>
+</div>
+
+<div id="finalInbox">
+  <div class="glass-card">
+      <h1 id="welcomeHeader">Your Letters</h1>
+      <div id="mailbox"></div>
+      <div id="letterDisplay"></div>
+      <button onclick="clearInbox()" style="background: #bbb; font-size: 11px; margin-top: 30px;">Clear Inbox</button>
+      <button onclick="location.reload()" style="background: transparent; color: #888; border: 1px solid #ddd; margin-top: 10px;">Lock</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getDatabase, ref, onValue, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBsAlAk1b6XWckFWyUb4xWnRYLGVGbl4vI",
+    authDomain: "my-mailbox-1e0f1.firebaseapp.com",
+    databaseURL: "https://my-mailbox-1e0f1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "my-mailbox-1e0f1",
+    storageBucket: "my-mailbox-1e0f1.firebasestorage.app",
+    messagingSenderId: "606445250262",
+    appId: "1:606445250262:web:3709008dea85f439210b77"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  let currentUser = "";
+
+  document.getElementById('unlockBtn').onclick = () => {
+    if(document.getElementById('secretCode').value === "18102025") {
+      currentUser = document.getElementById('userSelect').value;
+      document.getElementById('lockScreen').style.display = 'none';
+      document.getElementById('finalInbox').style.display = 'block';
+      loadLetters();
+    } else { 
+      alert("Maybe its an anniversary? (who knows)... ❌"); 
+    }
+  };
+
+  function loadLetters() {
+    const lettersRef = ref(db, 'letters/' + currentUser);
+    
+    // Clear current display in case of relogging
+    document.getElementById('mailbox').innerHTML = '';
+    
+    onChildAdded(lettersRef, (snapshot) => {
+      const letter = snapshot.val();
+      const env = document.createElement('div');
+      env.className = 'envelope'; 
+      env.innerHTML = letter.sticker || '💌';
+      
+      env.onclick = () => {
+        const display = document.getElementById('letterDisplay');
+        display.style.display = 'block'; 
+        display.style.color = letter.textColor;
+        display.style.backgroundColor = letter.paperColor || '#ffffff';
+        display.textContent = letter.text;
+        display.scrollIntoView({ behavior: 'smooth' });
+      };
+      document.getElementById('mailbox').appendChild(env);
+    });
+  }
+
+  window.clearInbox = () => {
+      if(confirm("Confirm deletion of all mail?")) {
+          remove(ref(db, 'letters/' + currentUser)).then(() => location.reload());
+      }
+  };
+</script>
+</body>
+</html>
